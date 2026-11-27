@@ -50,7 +50,7 @@
   "devDependencies": {
     "@n8n/node-cli": "0.58.7",
     "eslint": "9.32.0",
-    "nock": "^14.0.10",
+    "nock": "^15.0.6",
     "prettier": "3.6.2",
     "release-it": "^21.1.0",
     "typescript": "5.9.2"
