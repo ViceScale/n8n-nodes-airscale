@@ -2,7 +2,11 @@
 
 Contact enrichment and table operations using the [Airscale API](https://docs.airscale.io/api-reference/api-overview).
 
-**Status:** development candidate. Not published to npm or verified by n8n. Private self-hosted installation is available from source. n8n Cloud requires verification before this package can be installed.
+Airscale community nodes for self-hosted n8n. This package has not yet been verified by n8n. n8n Cloud requires verification before this package can be installed.
+
+## Installation
+
+For a published release, open **Settings → Community nodes → Install** in self-hosted n8n and enter `n8n-nodes-airscale`. Select your Airscale credential after importing an example workflow. Source and tarball installation are described below. A version named `0.0.0-stage` is npm's temporary placeholder, not an operational release.
 
 ## Nodes and operations
 
