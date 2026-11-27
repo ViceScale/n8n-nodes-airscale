@@ -95,14 +95,9 @@ export function buildLookupBody(operation: string, get: (name: string) => unknow
 	if (operation === 'personalEmail') body.verification = get('verification') === true;
 	if (['personProfile', 'phone', 'personalEmail', 'companyProfile'].includes(operation)) {
 		const raw = String(body.linkedin_profile_url);
-		let url: URL;
-		try {
-			url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
-		} catch {
-			// Pure validator; execute() wraps this error in NodeOperationError with the input item index.
-			// eslint-disable-next-line @n8n/community-nodes/require-node-api-error
-			throw new Error('A valid LinkedIn profile URL is required');
-		}
+		const candidate = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+		if (!URL.canParse(candidate)) throw new Error('A valid LinkedIn profile URL is required');
+		const url = new URL(candidate);
 		const segments = url.pathname.split('/').filter(Boolean);
 		const allowed = operation === 'companyProfile' ? ['company', 'school'] : ['in'];
 		if (

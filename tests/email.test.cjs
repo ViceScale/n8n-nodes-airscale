@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { AirscaleEmail } = require('../dist/nodes/AirscaleEmail/AirscaleEmail.node');
 const { AirscaleEmailResults } = require('../dist/nodes/AirscaleEmail/AirscaleEmailResults.node');
 const { AirscaleCallbackApi } = require('../dist/credentials/AirscaleCallbackApi.credentials');
+const { AirscaleApi } = require('../dist/credentials/AirscaleApi.credentials');
 const secret = 'synthetic-callback-secret-with-32-characters';
 function harness(
 	parameters = {},
@@ -75,8 +76,12 @@ function payload(overrides = {}) {
 	};
 }
 
-test('submission is clearly accepted, uses callback credential, and does not send arbitrary input', async () => {
+test('submission is clearly accepted, uses the shared encrypted credential, and does not send arbitrary input', async () => {
 	const h = harness();
+	h.context.getCredentials = async (name) => {
+		assert.equal(name, 'airscaleApi');
+		return { callbackSecret: secret };
+	};
 	const result = await new AirscaleEmail().execute.call(h.context);
 	assert.equal(h.calls.length, 1);
 	assert.equal(h.calls[0].credential, 'airscaleApi');
@@ -91,6 +96,34 @@ test('submission is clearly accepted, uses callback credential, and does not sen
 	assert.equal(result[0][0].json.email, undefined);
 	assert.deepEqual(result[0][0].pairedItem, { item: 0 });
 	assert.doesNotMatch(JSON.stringify(result), /token|synthetic-callback-secret/);
+});
+test('both email nodes use the same encrypted credential and callback secret stays optional elsewhere', () => {
+	for (const node of [new AirscaleEmail(), new AirscaleEmailResults()])
+		assert.deepEqual(node.description.credentials, [{ name: 'airscaleApi', required: true }]);
+	const property = new AirscaleApi().properties.find((p) => p.name === 'callbackSecret');
+	assert.equal(property.typeOptions.password, true);
+	assert.notEqual(property.required, true);
+});
+test('webhook activation validates the secret and cleanup is idempotent without remote requests', async () => {
+	const lifecycle = new AirscaleEmailResults().webhookMethods.default;
+	const data = {};
+	const context = {
+		getCredentials: async (name) => {
+			assert.equal(name, 'airscaleApi');
+			return { callbackSecret: secret };
+		},
+		getWorkflowStaticData: () => data,
+		getNode: () => harness().context.getNode(),
+	};
+	assert.equal(await lifecycle.checkExists.call(context), false);
+	assert.equal(await lifecycle.create.call(context), true);
+	assert.equal(await lifecycle.checkExists.call(context), true);
+	assert.equal(await lifecycle.delete.call(context), true);
+	assert.equal(await lifecycle.delete.call(context), true);
+	assert.equal(await lifecycle.checkExists.call(context), false);
+	context.getCredentials = async () => ({ callbackSecret: 'short' });
+	await assert.rejects(() => lifecycle.create.call(context), /Callback Secret/);
+	assert.deepEqual(data, {});
 });
 test('multiple inputs are submitted once each with unique item correlation and item linking', async () => {
 	const h = harness({}, [{ json: {} }, { json: {} }]);

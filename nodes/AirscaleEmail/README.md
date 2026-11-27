@@ -2,10 +2,12 @@
 
 Professional email lookup is asynchronous. Two nodes handle the two stages:
 
-1. Create a results workflow starting with **Airscale Email Results**. Select an **Airscale Callback Secret** credential containing a random secret of at least 32 characters. Connect the trigger to your destination, such as a CRM or table update.
+1. Create a results workflow starting with **Airscale Email Results**. Select an **Airscale API** credential containing your workspace API key and a **Callback Secret** of 32–512 characters without spaces. Connect the trigger to your destination, such as a CRM or table update.
 2. Activate that workflow. Copy the trigger's **Production URL**.
-3. In the submission workflow, add **Airscale Email**, select the Airscale API credential and the same Callback Secret credential, and paste the Production URL into **Results Webhook URL**. Map the person's LinkedIn profile or name and company.
+3. In the submission workflow, add **Airscale Email**, select the same Airscale API credential, and paste the Production URL into **Results Webhook URL**. Map the person's LinkedIn profile or name and company.
 4. Run the submission workflow. Each item outputs `status: "accepted"` and its `request_id`. Each completed callback starts a separate results execution containing the email outcome. Connect nodes that need the email to **Airscale Email Results**, not to the submission action.
+
+Activation validates the callback secret and records local readiness. Deactivation clears that marker; n8n removes its endpoint. Airscale accepts the callback URL per lookup and has no remote subscription to register or delete. Activation and deactivation do not make paid API calls.
 
 The persistent production endpoint exists before the lookup starts, so a fast callback can arrive immediately. Test webhook URLs are temporary and should only be used while n8n is explicitly listening for a test event. The production URL must be publicly reachable over HTTPS without an extra login or proxy authentication. No public tunnel is created by this package.
 

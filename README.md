@@ -18,7 +18,7 @@ For a published release, open **Settings → Community nodes → Install** in se
 
 Create an **Airscale API** credential with a current workspace API key from Airscale Settings. n8n encrypts credentials at rest. Authentication uses the Bearer header; the connection test calls `POST /v1/credits` without spending credits. API keys never belong in node parameters or workflow exports.
 
-For professional email, also create **Airscale Callback API** with a random secret of at least 32 characters. Use the same callback credential in both email nodes. Publish the Results workflow first, copy its Production URL into the Submit node, then run submissions. The submit node adds the shared secret to the callback URL. Treat complete callback URLs as secrets and avoid logging them at your reverse proxy. Exported workflows contain credential references, not secret values.
+For professional email, fill **Callback Secret** in your **Airscale API** credential with a random secret of 32–512 characters without spaces. Select that same Airscale API credential in both email nodes. Leave Callback Secret empty if you only use other operations. Publish the Results workflow first, copy its Production URL into the Submit node, then run submissions. The submit node adds the shared secret to the callback URL. Treat complete callback URLs as secrets and avoid logging them at your reverse proxy. Exported workflows contain credential references, not secret values.
 
 A callback starts a separate workflow execution. This avoids the race where a fast result arrives before a waiting execution is persisted. Production webhook URLs must be publicly reachable HTTPS URLs. Test webhook URLs are temporary and suitable for one test only. Airscale currently attempts callback delivery once; outages can lose delivery. This integration does not promise exactly-once delivery: use `request_id` or your `custom_id` to make downstream writes idempotent. Do not resubmit a lookup merely because delivery is uncertain.
 
@@ -52,15 +52,21 @@ npm pack
 
 Install the resulting tarball into the `nodes` directory of an isolated self-hosted n8n user folder, then restart n8n. Follow [n8n private-node installation](https://docs.n8n.io/connect/create-nodes/deploy-your-node/install-private-nodes). Do not put n8n's user folder inside this repository when using a linked development package: that creates recursive file traversal.
 
+`npm run scan` runs n8n’s review scanner against local source and the packed artifact. CI and release staging require it to pass; registry provenance is checked again after publication.
+
 `npm run dev` uses the official n8n-node CLI. Development nodes can be named `CUSTOM.airscale`; installed community packages use `n8n-nodes-airscale.airscale`. Workflow type names must match the installation mode.
 
 ## Examples and verification
 
-`examples/credit-balance.json`, `examples/table-row-mapping.json`, and `examples/table-write-readback.json` demonstrate downstream mapping and table CRUD. `examples/professional-email-submit.json` and `examples/professional-email-results.json` demonstrate the two-workflow callback flow; replace the example callback URL before use. They use synthetic fixture names/IDs: select your own credential and table after import. Keep workflows unpublished until configured. No credentials are embedded.
+`examples/credit-balance.json`, `examples/table-row-mapping.json`, and `examples/table-write-readback.json` demonstrate downstream mapping and table CRUD. `examples/professional-email-submit.json` and `examples/professional-email-results.json` demonstrate the two-workflow callback flow; replace the example callback URL before use. The balance example is ready for a free live check after selecting your credential. The other examples use synthetic fixture names/IDs: select your own credential and table after import. Keep workflows unpublished until configured. No credentials are embedded.
 
 `tests/runtime-api-mock.cjs` is a **development-only** preload, excluded from the npm package. The special fixture key produces synthetic results; paid calls with real keys are blocked in this test mode. It must never be used as a production API adapter. Unit tests verify API contracts, type preservation, pagination, idempotency, credential handling, callback authentication, and malformed responses. Live paid enrichment has not been tested without an approved budget.
 
 See [verification evidence](docs/verification.md) and [distribution status and release steps](docs/distribution.md).
+
+## Upgrading from 0.1.1
+
+Version 0.2.0 consolidates email authentication. Copy your existing callback secret into **Callback Secret** on your **Airscale API** credential, then select that same credential in both email nodes before running or reactivating the workflows. The legacy callback credential remains available for migration; ordinary balance, lookup and table credentials are unchanged.
 
 ## Support
 

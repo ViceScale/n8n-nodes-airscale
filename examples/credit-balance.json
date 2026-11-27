@@ -1,5 +1,5 @@
 {
-  "name": "Airscale \u2014 Credit balance mapping (synthetic demo)",
+  "name": "Airscale \u2014 Credit balance mapping (no credits spent)",
   "nodes": [
     {
       "id": "manual",
@@ -27,7 +27,7 @@
       },
       "credentials": {
         "airscaleApi": {
-          "name": "Airscale \u2014 SYNTHETIC FIXTURE ONLY"
+          "name": "Airscale API"
         }
       }
     },
@@ -52,7 +52,7 @@
             {
               "id": "source",
               "name": "source",
-              "value": "Synthetic fixture \u2014 no live API credits",
+              "value": "Airscale workspace API \u2014 free balance check",
               "type": "string"
             }
           ]

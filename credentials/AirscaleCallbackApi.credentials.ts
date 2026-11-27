@@ -3,9 +3,8 @@ import { validSecret } from '../nodes/AirscaleEmail/callback';
 
 export class AirscaleCallbackApi implements ICredentialType {
 	name = 'airscaleCallbackApi';
-	// This credential holds an inbound webhook secret, not a remote API key.
-	// eslint-disable-next-line n8n-nodes-base/cred-class-field-display-name-missing-api
-	displayName = 'Airscale Callback Secret';
+	// Retained so users can retrieve their previous secret while migrating from 0.1.1.
+	displayName = 'Airscale Legacy Callback API';
 	documentationUrl = 'https://github.com/ViceScale/n8n-nodes-airscale#professional-email-results';
 	icon: Icon = {
 		light: 'file:../nodes/Airscale/airscale.svg',
@@ -20,7 +19,7 @@ export class AirscaleCallbackApi implements ICredentialType {
 			required: true,
 			default: '',
 			description:
-				'A random secret of at least 32 characters, without spaces. Use the same credential in Airscale Email and Airscale Email Results. This is not your Airscale API key.',
+				'Legacy credential from 0.1.1. Copy this secret into the Callback Secret field of your Airscale API credential, then select that credential in both email nodes.',
 		},
 	];
 	test: ICredentialTestFunction = async function (credential) {
@@ -28,7 +27,7 @@ export class AirscaleCallbackApi implements ICredentialType {
 			? {
 					status: 'OK',
 					message:
-						'Secret format is valid. Use the same credential in both email nodes and verify delivery with an active Results workflow.',
+						'Secret format is valid. Migrate it to your Airscale API credential and select that credential in both email nodes.',
 				}
 			: {
 					status: 'Error',

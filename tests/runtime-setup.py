@@ -9,7 +9,7 @@ def call(path,body=None,method=None):
  try:
   with opener.open(req,timeout=30) as r:return json.load(r).get('data')
  except urllib.error.HTTPError as e:raise RuntimeError(f'{path}: {e.code} {e.read().decode()[:400]}')
-cred=call('/rest/credentials',{'name':'Airscale — SYNTHETIC FIXTURE ONLY','type':'airscaleApi','data':{'apiKey':'airscale-n8n-fixture-key'}})
+cred=call('/rest/credentials',{'name':'Airscale — SYNTHETIC FIXTURE ONLY','type':'airscaleApi','data':{'apiKey':'airscale-n8n-fixture-key','callbackSecret':'synthetic-callback-secret-with-32-characters'}})
 credential={'airscaleApi':{'id':cred['id'],'name':cred['name']}}
 manual={'id':'manual','name':'Manual Trigger','type':'n8n-nodes-base.manualTrigger','typeVersion':1,'position':[240,300],'parameters':{}}
 def air(name,params,pos):return {'id':name.lower().replace(' ','-'),'name':name,'type':'n8n-nodes-airscale.airscale','typeVersion':1,'position':pos,'parameters':params,'credentials':credential}

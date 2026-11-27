@@ -1,6 +1,7 @@
-import { NodeConnectionTypes } from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import type {
 	IDataObject,
+	IHookFunctions,
 	INodeType,
 	INodeTypeDescription,
 	IWebhookFunctions,
@@ -15,7 +16,6 @@ function reject(context: IWebhookFunctions, code: number, message: string): IWeb
 
 // n8n owns this inbound webhook's activation lifecycle; Airscale accepts its URL per submission.
 // No remote subscription exists to create, check or delete. A trigger is not an AI action tool.
-// eslint-disable-next-line @n8n/community-nodes/webhook-lifecycle-complete
 export class AirscaleEmailResults implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Airscale Email Results',
@@ -28,14 +28,14 @@ export class AirscaleEmailResults implements INodeType {
 		defaults: { name: 'Airscale Email Results' },
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
-		credentials: [{ name: 'airscaleCallbackApi', required: true }],
+		credentials: [{ name: 'airscaleApi', required: true }],
 		webhooks: [
 			{ name: 'default', httpMethod: 'POST', responseMode: 'onReceived', path: 'email-results' },
 		],
 		properties: [
 			{
 				displayName:
-					'Activate this workflow before submitting email lookups. Copy this trigger’s Production URL into Airscale Email and use the same Callback Secret credential in both nodes. Test URLs are temporary.',
+					'Activate this workflow before submitting email lookups. Copy this trigger’s Production URL into Airscale Email and use the same Airscale API credential, with Callback Secret configured, in both nodes. Test URLs are temporary.',
 				name: 'setupNotice',
 				type: 'notice',
 				default: '',
@@ -49,8 +49,35 @@ export class AirscaleEmailResults implements INodeType {
 			},
 		],
 	};
+	// Airscale has no subscription API: the sender provides this URL per lookup.
+	// n8n registers/removes the local endpoint; these hooks validate readiness without spending credits.
+	webhookMethods = {
+		default: {
+			async checkExists(this: IHookFunctions): Promise<boolean> {
+				const credential = await this.getCredentials('airscaleApi');
+				return (
+					validSecret(credential.callbackSecret) &&
+					this.getWorkflowStaticData('node').callbackReady === true
+				);
+			},
+			async create(this: IHookFunctions): Promise<boolean> {
+				const credential = await this.getCredentials('airscaleApi');
+				if (!validSecret(credential.callbackSecret))
+					throw new NodeOperationError(
+						this.getNode(),
+						'Callback Secret must contain 32–512 characters without spaces',
+					);
+				this.getWorkflowStaticData('node').callbackReady = true;
+				return true;
+			},
+			async delete(this: IHookFunctions): Promise<boolean> {
+				delete this.getWorkflowStaticData('node').callbackReady;
+				return true;
+			},
+		},
+	};
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
-		const credentials = await this.getCredentials('airscaleCallbackApi');
+		const credentials = await this.getCredentials('airscaleApi');
 		const secret = credentials.callbackSecret;
 		if (!validSecret(secret))
 			return reject(this, 503, 'Callback credential is not configured correctly');

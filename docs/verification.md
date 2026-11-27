@@ -1,11 +1,11 @@
 # Verification — 27 November 2026
 
-Candidate: n8n-nodes-airscale 0.1.0. Tested in the actual n8n 2.49.7 editor and runtime, using an isolated loopback instance and a development-only synthetic API fixture. No live enrichment credits were spent.
+Package: n8n-nodes-airscale 0.2.0. Tested in the actual n8n 2.49.7 editor and runtime, using an isolated loopback instance and a development-only synthetic API fixture. No live enrichment credits were spent.
 
 ## Automated checks
 
 - Official `n8n-node` build and strict lint passed.
-- Node test runner: 56 passed, 0 failed.
+- Node test runner: 58 passed, 0 failed.
 - Coverage includes all requested endpoint contracts, validation, item pairing, response normalization, JSON type preservation, cursor pagination/cycles, idempotency across loop runs, retry guards, safe error messages, and callback authentication/schema checks.
 - `npm pack --dry-run`: no tests, fixture data, local runtime, credentials, environment files, or node_modules included. Five workflow examples contain credential names only, not secrets or account-specific credential IDs.
 
@@ -29,12 +29,18 @@ The results trigger was unpublished after verification and is loopback-only in t
 
 ## Limits
 
-These tests establish integration behavior against synthetic responses and published API contracts. They do not establish live enrichment quality, provider latency, paid billing behavior, or public internet callback delivery. All paid lookup operations remain untested against production. The available local API credential returned HTTP 403 on the no-credit balance/table checks; a current authorized workspace API key is still required for a live smoke test.
+These tests establish integration behavior against synthetic responses and published API contracts. They do not establish live enrichment quality, provider latency, paid billing behavior, or public internet callback delivery. All paid lookup operations remain untested against production. The earlier stale local key returned HTTP 403. A current workspace key was subsequently selected from Airscale Settings and saved only in an encrypted n8n credential restricted to api.airscale.io. Its real connection test succeeded. Execution 8 called the live POST /v1/credits endpoint and mapped the numeric result into a downstream node successfully, without spending credits or exposing the balance in this repository.
 
 The n8n Cloud trial was created on 27 November 2026. The authenticated dashboard, owner account, and community-node settings were verified in the owner's actual Chrome browser (Cloud n8n 2.49.8). No payment method was added. The custom Airscale nodes are not installed on Cloud.
 
-npm browser and CLI authentication succeeded as `airscale` on 27 November using the existing saved login and passkey. The initial local 0.1.0 tarball was staged, SHA-1 `cceb01feaa9cd37b665ee85382429bd3714b9e1c`. This bootstrap stage lacks GitHub provenance and must not be approved. The owner then approved the scoped trusted publisher and Creator account terms. npm confirmed the `ViceScale/n8n-nodes-airscale` / `publish.yml` connection with only `npm stage publish` permission. The Creator Portal confirmed account creation and requested email verification. The GitHub workflow builds, tests and stages releases with provenance; final public release is a separate approval and registry verification step. n8n verification is not claimed. See distribution.md and the public registry for release status.
+## Distribution and review
 
-Source validation: GitHub CI passed on commit `7b9f844668b3ec72b09732b6f8694580a8360c33`: https://github.com/ViceScale/n8n-nodes-airscale/actions/runs/45923704623.
+Version 0.1.1 was published publicly with GitHub provenance on 27 November. The release workflow passed all checks: https://github.com/ViceScale/n8n-nodes-airscale/actions/runs/45998501350. Registry SHA-1: `1243c64134ec1043d515a9d9a70da48e3b0275c9`. The GitHub-built tarball was inspected and all 17 compiled code/JSON/logo assets matched the previously tested build.
 
-Release workflow validation: GitHub CI passed on commit `63e10fa6f1c9afa04bf197ddc47dd4d45e9bfde6`: https://github.com/ViceScale/n8n-nodes-airscale/actions/runs/45996925395. This validates the source, not an npm release.
+The owner approved a staging-only npm trusted publisher scoped to `ViceScale/n8n-nodes-airscale` / `publish.yml`, and creation of the Airscale Creator account. The Creator account was activated, package ownership confirmed by email, and the package submitted at https://creators.n8n.io/nodes/n8n-nodes-airscale/integration.
+
+The automated review of 0.1.1 required changes: its scanner ignores inline lint exceptions, unlike the local CLI. Version 0.2.0 addresses the seven reported errors. It consolidates encrypted email credentials, validates webhook activation and cleanup, declares AI tool support, and preserves safe error status/guidance. The official `@n8n/scan-community-package@0.45.0` local-source scan passed. The optional Correlation JSON field is deliberately retained for explicitly shared user metadata; its scanner warning does not represent missing configuration. The scanner runs in CI and before every staged release.
+
+The 0.2.0 tarball was installed into the isolated runtime. In the actual editor, Email showed one credential selector and correct setup instructions. Execution 9 submitted a synthetic lookup and mapped acceptance. Execution 10 received the authenticated callback and mapped the email result. Activation and deactivation both succeeded; the Results workflow was unpublished afterward. All 58 tests and build passed. Paid calls remain blocked by the development-only fixture guard.
+
+Public registry publication and n8n approval are separate checks. Version 0.2.0 is prepared for provenance-enabled publication and resubmission; no n8n verification is claimed. The original unprovenanced local 0.1.0 bootstrap stage remains unapproved.

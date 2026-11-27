@@ -20,6 +20,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      - run: npm run scan
       - name: Stage the release for npm approval
         run: npm stage publish --provenance --access public
         env:

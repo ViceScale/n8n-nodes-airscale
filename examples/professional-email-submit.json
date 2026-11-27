@@ -34,9 +34,6 @@
       "credentials": {
         "airscaleApi": {
           "name": "Airscale \u2014 SYNTHETIC FIXTURE ONLY"
-        },
-        "airscaleCallbackApi": {
-          "name": "Airscale Callback \u2014 SYNTHETIC FIXTURE ONLY"
         }
       }
     },

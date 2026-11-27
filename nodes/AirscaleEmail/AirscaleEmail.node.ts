@@ -103,8 +103,6 @@ function submissionError(error: Error, index: number, envelope?: IDataObject): I
 	};
 }
 
-// Paid submissions should not be selected automatically by an AI agent.
-// eslint-disable-next-line @n8n/community-nodes/node-usable-as-tool
 export class AirscaleEmail implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Airscale Email',
@@ -118,13 +116,8 @@ export class AirscaleEmail implements INodeType {
 		defaults: { name: 'Airscale Email' },
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
-		// Separate secrets authenticate two peers: outbound Airscale API and inbound n8n callbacks.
-		// Neither belongs in exported node parameters, and they are not alternative auth methods.
-		// eslint-disable-next-line @n8n/community-nodes/single-credential-per-node
-		credentials: [
-			{ name: 'airscaleApi', required: true },
-			{ name: 'airscaleCallbackApi', required: true },
-		],
+		usableAsTool: true,
+		credentials: [{ name: 'airscaleApi', required: true }],
 		properties: [
 			{ displayName: 'Resource', name: 'resource', type: 'hidden', default: 'professionalEmail' },
 			{
@@ -145,7 +138,7 @@ export class AirscaleEmail implements INodeType {
 			},
 			{
 				displayName:
-					'Activate a separate workflow starting with Airscale Email Results before submitting. Copy its Production URL below and select the same Callback Secret credential in both nodes. This node outputs acceptance, not the email result.',
+					'Activate a separate workflow starting with Airscale Email Results before submitting. Copy its Production URL below and select the same Airscale API credential in both nodes, with Callback Secret configured. This node outputs acceptance, not the email result.',
 				name: 'callbackNotice',
 				type: 'notice',
 				default: '',
@@ -247,7 +240,7 @@ export class AirscaleEmail implements INodeType {
 				description:
 					'Email submission has no idempotency guarantee. Automatic retries could submit and charge the same contact again.',
 			});
-		const credential = await this.getCredentials('airscaleCallbackApi');
+		const credential = await this.getCredentials('airscaleApi');
 		const secret = credential.callbackSecret;
 		if (!validSecret(secret))
 			throw new NodeOperationError(

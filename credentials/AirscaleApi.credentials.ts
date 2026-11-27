@@ -30,6 +30,15 @@ export class AirscaleApi implements ICredentialType {
 			description:
 				'Workspace API key from Airscale Settings. Connection testing checks your balance without spending credits.',
 		},
+		{
+			displayName: 'Callback Secret',
+			name: 'callbackSecret',
+			type: 'string',
+			typeOptions: { password: true },
+			default: '',
+			description:
+				'Only required for the email nodes: a random secret of 32–512 characters without spaces. Select this same Airscale API credential in both email nodes. Leave empty for other operations.',
+		},
 	];
 	authenticate: IAuthenticateGeneric = {
 		type: 'generic',

@@ -51,9 +51,10 @@ export class Airscale implements INodeType {
 		const inputs = this.getInputData();
 		const results: INodeExecutionData[] = [];
 		for (let itemIndex = 0; itemIndex < inputs.length; itemIndex++) {
+			let operation = '';
 			try {
 				const resource = this.getNodeParameter('resource', itemIndex) as string;
-				const operation = this.getNodeParameter('operation', itemIndex) as string;
+				operation = this.getNodeParameter('operation', itemIndex) as string;
 				if (resource === 'table' || resource === 'row') {
 					if (this.getNode().retryOnFail && operation === 'update')
 						throw new NodeOperationError(
@@ -88,41 +89,41 @@ export class Airscale implements INodeType {
 						? suppliedKey ||
 							`n8n-${this.getExecutionId()}-${encodeURIComponent(this.getNode().id)}-${this.evaluateExpression('{{ $runIndex }}', itemIndex)}-${itemIndex}`
 						: undefined;
-				try {
-					const response = await airscaleRequest(this, `/v1/${spec.endpoint}`, 'POST', body, {
-						idempotencyKey,
-						timeout: operation === 'verifyEmail' ? 150000 : 130000,
-					});
+				const response = await airscaleRequest(this, `/v1/${spec.endpoint}`, 'POST', body, {
+					idempotencyKey,
+					timeout: operation === 'verifyEmail' ? 150000 : 130000,
+				});
+				results.push({
+					json: normalizeResponse(operation, response),
+					pairedItem: { item: itemIndex },
+				});
+			} catch (error) {
+				if (
+					operation === 'companyUrl' &&
+					error instanceof NodeApiError &&
+					error.httpCode === '404'
+				) {
 					results.push({
-						json: normalizeResponse(operation, response),
+						json: { status: 'not_found', linkedin_company_url: null },
 						pairedItem: { item: itemIndex },
 					});
-				} catch (error) {
-					if (
-						operation === 'companyUrl' &&
-						error instanceof NodeApiError &&
-						error.httpCode === '404'
-					) {
-						results.push({
-							json: { status: 'not_found', linkedin_company_url: null },
-							pairedItem: { item: itemIndex },
-						});
-					} else {
-						// Already normalized by the transport; preserve HTTP status and safe retry guidance.
-						// eslint-disable-next-line @n8n/community-nodes/require-node-api-error
-						throw error;
-					}
-				}
-			} catch (error) {
-				if (this.continueOnFail()) {
+				} else if (this.continueOnFail()) {
 					results.push({
 						json: { error: (error as Error).message },
 						pairedItem: { item: itemIndex },
 					});
-				} else if (error instanceof NodeApiError || error instanceof NodeOperationError) {
-					// Preserve n8n errors and their item context without wrapping a safe error again.
-					// eslint-disable-next-line @n8n/community-nodes/require-node-api-error
-					throw error;
+				} else if (error instanceof NodeApiError) {
+					// Transport errors are already redacted. Preserve status and retry guidance in the UI.
+					throw new NodeApiError(
+						this.getNode(),
+						{ message: error.message },
+						{
+							message: error.message,
+							description: error.description ?? undefined,
+							httpCode: error.httpCode ?? undefined,
+							itemIndex,
+						},
+					);
 				} else throw new NodeOperationError(this.getNode(), error as Error, { itemIndex });
 			}
 		}
