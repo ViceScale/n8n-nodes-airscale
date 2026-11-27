@@ -1,0 +1,85 @@
+{
+  "name": "Airscale \u2014 Readable table mapping (synthetic demo)",
+  "nodes": [
+    {
+      "id": "manual",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "list-rows",
+      "name": "List Rows",
+      "type": "n8n-nodes-airscale.airscale",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "getAll",
+        "tableId": {
+          "mode": "list",
+          "value": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+          "cachedResultName": "Fixture Prospects \u2014 Synthetic Data"
+        },
+        "returnAll": false,
+        "limit": 50
+      },
+      "credentials": {
+        "airscaleApi": {
+          "name": "Airscale \u2014 SYNTHETIC FIXTURE ONLY"
+        }
+      }
+    },
+    {
+      "id": "map-contact",
+      "name": "Map Contact",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ { name: $json.fields.Name, email: $json.fields.Email, count: $json.fields.Count, metadata: $json.fields.Metadata } }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "List Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Rows": {
+      "main": [
+        [
+          {
+            "node": "Map Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

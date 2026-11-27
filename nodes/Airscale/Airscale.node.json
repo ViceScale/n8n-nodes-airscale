@@ -1,0 +1,7 @@
+{
+  "node": "n8n-nodes-airscale.airscale",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Sales", "Data & Storage"],
+  "resources": {"primaryDocumentation": [{"url": "https://docs.airscale.io/api-reference/api-overview"}]}
+}

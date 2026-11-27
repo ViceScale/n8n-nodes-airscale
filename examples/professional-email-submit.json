@@ -1,0 +1,87 @@
+{
+  "name": "Airscale \u2014 Submit professional email (synthetic demo)",
+  "nodes": [
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "submit-email",
+      "name": "Submit Email",
+      "type": "n8n-nodes-airscale.airscaleEmail",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "operation": "submit",
+        "callbackUrl": "https://n8n-airscale.example.org/webhook/b9e3ef53-23dc-43b4-b7af-71bf15444142/email-results",
+        "identifyBy": "name",
+        "firstName": "Sample",
+        "lastName": "Contact",
+        "domain": "example.com",
+        "customId": "sample-contact-001",
+        "correlation": "{\"source\":\"Synthetic n8n fixture\"}"
+      },
+      "credentials": {
+        "airscaleApi": {
+          "name": "Airscale \u2014 SYNTHETIC FIXTURE ONLY"
+        },
+        "airscaleCallbackApi": {
+          "name": "Airscale Callback \u2014 SYNTHETIC FIXTURE ONLY"
+        }
+      }
+    },
+    {
+      "id": "map-acceptance",
+      "name": "Map Acceptance",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ { accepted: $json.status, requestId: $json.request_id, contactId: $json.custom_id } }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Submit Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit Email": {
+      "main": [
+        [
+          {
+            "node": "Map Acceptance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

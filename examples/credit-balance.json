@@ -1,0 +1,92 @@
+{
+  "name": "Airscale \u2014 Credit balance mapping (synthetic demo)",
+  "nodes": [
+    {
+      "id": "manual",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "check-credit-balance",
+      "name": "Check Credit Balance",
+      "type": "n8n-nodes-airscale.airscale",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "resource": "workspace",
+        "operation": "credits"
+      },
+      "credentials": {
+        "airscaleApi": {
+          "name": "Airscale \u2014 SYNTHETIC FIXTURE ONLY"
+        }
+      }
+    },
+    {
+      "id": "map-credit-balance",
+      "name": "Map Credit Balance",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "availableCredits",
+              "name": "availableCredits",
+              "value": "={{ $json.credits }}",
+              "type": "number"
+            },
+            {
+              "id": "source",
+              "name": "source",
+              "value": "Synthetic fixture \u2014 no live API credits",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check Credit Balance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Credit Balance": {
+      "main": [
+        [
+          {
+            "node": "Map Credit Balance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

@@ -1,0 +1,64 @@
+{
+  "name": "n8n-nodes-airscale",
+  "version": "0.1.0",
+  "description": "Airscale contact enrichment and table operations for n8n",
+  "license": "MIT",
+  "homepage": "https://airscale.io",
+  "keywords": [
+    "n8n-community-node-package"
+  ],
+  "author": {
+    "name": "Airscale",
+    "email": "victor@airscale.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ViceScale/n8n-nodes-airscale.git"
+  },
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease",
+    "test": "npm run build && node --test tests/*.test.cjs"
+  },
+  "files": [
+    "dist",
+    "examples",
+    "docs/distribution.md",
+    "docs/verification.md",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/AirscaleApi.credentials.js",
+      "dist/credentials/AirscaleCallbackApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Airscale/Airscale.node.js",
+      "dist/nodes/AirscaleEmail/AirscaleEmail.node.js",
+      "dist/nodes/AirscaleEmail/AirscaleEmailResults.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "0.58.7",
+    "eslint": "9.32.0",
+    "nock": "^14.0.10",
+    "prettier": "3.6.2",
+    "release-it": "^21.1.0",
+    "typescript": "5.9.2"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "bugs": {
+    "url": "https://github.com/ViceScale/n8n-nodes-airscale/issues"
+  }
+}

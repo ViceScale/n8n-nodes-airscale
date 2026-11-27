@@ -1,0 +1,54 @@
+{
+  "name": "Airscale \u2014 Email results mapping (synthetic demo)",
+  "nodes": [
+    {
+      "id": "receive-email-results",
+      "name": "Receive Email Results",
+      "type": "n8n-nodes-airscale.airscaleEmailResults",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {},
+      "credentials": {
+        "airscaleCallbackApi": {
+          "name": "Airscale Callback \u2014 SYNTHETIC FIXTURE ONLY"
+        }
+      },
+      "webhookId": "b9e3ef53-23dc-43b4-b7af-71bf15444142"
+    },
+    {
+      "id": "map-email-result",
+      "name": "Map Email Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ { email: $json.email, status: $json.status, contactId: $json.custom_id, requestId: $json.request_id, source: $json.correlation.source } }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Receive Email Results": {
+      "main": [
+        [
+          {
+            "node": "Map Email Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

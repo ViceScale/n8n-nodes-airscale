@@ -1,0 +1,239 @@
+{
+  "name": "Airscale \u2014 Table writes and readback (synthetic demo)",
+  "nodes": [
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "create-table",
+      "name": "Create Table",
+      "type": "n8n-nodes-airscale.airscale",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "Synthetic n8n write demo",
+        "columnInputMode": "builder",
+        "columns": {
+          "column": [
+            {
+              "label": "Name",
+              "type": "text"
+            },
+            {
+              "label": "Count",
+              "type": "number"
+            },
+            {
+              "label": "Metadata",
+              "type": "json"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "airscaleApi": {
+          "name": "Airscale \u2014 SYNTHETIC FIXTURE ONLY"
+        }
+      }
+    },
+    {
+      "id": "create-row",
+      "name": "Create Row",
+      "type": "n8n-nodes-airscale.airscale",
+      "typeVersion": 1,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "create",
+        "tableId": {
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "rowInputMode": "json",
+        "rowsJson": "={{ [{ values: { [$json.columns[0].id]: \"Synthetic Contact\", [$json.columns[1].id]: 0, [$json.columns[2].id]: [\"synthetic\", false] } }] }}"
+      },
+      "credentials": {
+        "airscaleApi": {
+          "name": "Airscale \u2014 SYNTHETIC FIXTURE ONLY"
+        }
+      }
+    },
+    {
+      "id": "update-row",
+      "name": "Update Row",
+      "type": "n8n-nodes-airscale.airscale",
+      "typeVersion": 1,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "tableId": {
+          "mode": "id",
+          "value": "={{ $json._airscale.tableId }}"
+        },
+        "rowInputMode": "json",
+        "rowId": "={{ $json.id }}",
+        "rowsJson": "={{ [{ id: $json.id, values: { [$json._airscale.columns[1].id]: 9, [$json._airscale.columns[2].id]: null } }] }}"
+      },
+      "credentials": {
+        "airscaleApi": {
+          "name": "Airscale \u2014 SYNTHETIC FIXTURE ONLY"
+        }
+      }
+    },
+    {
+      "id": "get-table",
+      "name": "Get Table",
+      "type": "n8n-nodes-airscale.airscale",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        300
+      ],
+      "parameters": {
+        "resource": "table",
+        "operation": "get",
+        "tableId": {
+          "mode": "id",
+          "value": "={{ $('Create Table').first().json.id }}"
+        }
+      },
+      "credentials": {
+        "airscaleApi": {
+          "name": "Airscale \u2014 SYNTHETIC FIXTURE ONLY"
+        }
+      }
+    },
+    {
+      "id": "read-updated-row",
+      "name": "Read Updated Row",
+      "type": "n8n-nodes-airscale.airscale",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "getAll",
+        "tableId": {
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "returnAll": false,
+        "limit": 50
+      },
+      "credentials": {
+        "airscaleApi": {
+          "name": "Airscale \u2014 SYNTHETIC FIXTURE ONLY"
+        }
+      }
+    },
+    {
+      "id": "map-updated-row",
+      "name": "Map Updated Row",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1680,
+        300
+      ],
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ { name: $json.fields.Name, count: $json.fields.Count, metadata: $json.fields.Metadata } }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Table": {
+      "main": [
+        [
+          {
+            "node": "Create Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Row": {
+      "main": [
+        [
+          {
+            "node": "Update Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Row": {
+      "main": [
+        [
+          {
+            "node": "Get Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Table": {
+      "main": [
+        [
+          {
+            "node": "Read Updated Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Updated Row": {
+      "main": [
+        [
+          {
+            "node": "Map Updated Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}
