@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-airscale",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Airscale contact enrichment and table operations for n8n",
   "license": "MIT",
   "homepage": "https://airscale.io",
